@@ -1,0 +1,29 @@
+{
+  "entities": {
+    "Summary": {
+      "title": "Scholar Summary",
+      "description": "An extracted summary of an academic paper or book.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "The title of the paper" },
+        "author": { "type": "string", "description": "The author of the paper" },
+        "category": { "type": "string", "description": "Academic field" },
+        "documentType": { "type": "string", "enum": ["Book", "Textbook", "Academic Paper", "Article"], "description": "Type of document" },
+        "tags": { "type": "array", "items": { "type": "string" }, "description": "Automated tags" },
+        "thesis": { "type": "string", "description": "Core thesis/main argument" },
+        "keyArguments": { "type": "array", "items": { "type": "string" }, "description": "List of key arguments" },
+        "thematicSynthesis": { "type": "string", "description": "Grounded thematic analysis" },
+        "contributor": { "type": "string", "description": "Name of person who uploaded" },
+        "timestamp": { "type": "number", "description": "Creation time" },
+        "model": { "type": "string", "description": "Gemini model used for summary" }
+      },
+      "required": ["title", "author", "category", "documentType", "tags", "thesis", "keyArguments", "thematicSynthesis", "contributor", "timestamp", "model"]
+    }
+  },
+  "firestore": {
+    "/summaries/{summaryId}": {
+      "schema": "Summary",
+      "description": "Public collection of paper summaries."
+    }
+  }
+}

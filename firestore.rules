@@ -1,0 +1,43 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global helpers
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    // Validation for Summary Entity
+    function isValidSummary(data) {
+      return data.keys().hasAll(['title', 'author', 'category', 'documentType', 'tags', 'thesis', 'keyArguments', 'thematicSynthesis', 'contributor', 'timestamp', 'model'])
+        && data.keys().size() == 11
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 500
+        && data.author is string && data.author.size() <= 200
+        && data.category is string && data.category.size() <= 100
+        && data.documentType is string && data.documentType in ['Book', 'Textbook', 'Academic Paper', 'Article']
+        && data.tags is list && data.tags.size() <= 10
+        && data.thesis is string && data.thesis.size() <= 2000
+        && data.keyArguments is list && data.keyArguments.size() <= 10
+        && data.thematicSynthesis is string && data.thematicSynthesis.size() <= 1000
+        && data.contributor is string && data.contributor.size() <= 100
+        && data.timestamp is number
+        && data.model is string;
+    }
+
+    match /summaries/{summaryId} {
+      // Allow public read for the library
+      allow get, list: if true;
+      
+      // Allow creation with strict validation
+      allow create: if isValidId(summaryId) && isValidSummary(incoming());
+      
+      // Prevent deletion/update from public client for security
+      // In a real app we'd add Auth here
+      allow update, delete: if false;
+    }
+  }
+}
